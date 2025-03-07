@@ -11,14 +11,6 @@
         "server": "cd server && npm run dev",
         "dev": "concurrently \"npm run server\" \"npm run client\"",
         "build": "cd client && npm run build && cd ../server && npm run build",
-        "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
-        "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
-        "docker:dev:logs": "docker-compose -f docker-compose.dev.yml logs -f",
-        "docker:prod": "docker-compose up -d",
-        "docker:prod:down": "docker-compose down",
-        "docker:prod:logs": "docker-compose logs -f",
-        "docker:build": "docker-compose build",
-        "docker:dev:build": "docker-compose -f docker-compose.dev.yml build",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [
@@ -28,7 +20,6 @@
         "collaborative",
         "mern",
         "typescript",
-        "socket.io",
         "openai",
         "supabase"
     ],

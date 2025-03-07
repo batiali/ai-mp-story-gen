@@ -1,9 +1,16 @@
-import { Request, Response } from "express";
-import { Vote, Choice, StoryBeat, Story } from "../models";
+import { Vote, Choice, StoryBeat, Story, IVote, IChoice } from "../models";
 import mongoose from "mongoose";
+import {
+    SubmitVoteRequest,
+    SubmitVoteResponse,
+    GetVotesForBeatRequest,
+    GetVotesForBeatResponse,
+    GetUserVoteForBeatRequest,
+    GetUserVoteForBeatResponse,
+} from "../types/vote.types";
 
 // Submit a vote
-export const submitVote = async (req: Request, res: Response) => {
+export const submitVote = async (req: SubmitVoteRequest, res: SubmitVoteResponse) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -13,34 +20,40 @@ export const submitVote = async (req: Request, res: Response) => {
         // Check if story exists and is active
         const story = await Story.findById(storyId);
         if (!story) {
-            return res.status(404).json({ message: "Story not found" });
+            return res.status(404).json({ success: false, error: "Story not found" });
         }
 
         if (!story.isActive) {
-            return res.status(400).json({ message: "Cannot vote on an inactive story" });
+            return res
+                .status(400)
+                .json({ success: false, error: "Cannot vote on an inactive story" });
         }
 
         // Check if beat exists and is the current beat
         const beat = await StoryBeat.findById(beatId);
         if (!beat) {
-            return res.status(404).json({ message: "Story beat not found" });
+            return res
+                .status(404)
+                .json({ success: false, error: "Story beat not found" });
         }
 
         if (beat.beatNumber !== story.currentBeat) {
-            return res.status(400).json({ message: "Can only vote on the current beat" });
+            return res
+                .status(400)
+                .json({ success: false, error: "Can only vote on the current beat" });
         }
 
         // Check if choice exists and belongs to the beat
         const choice = await Choice.findById(choiceId);
         if (!choice) {
-            return res.status(404).json({ message: "Choice not found" });
+            return res.status(404).json({ success: false, error: "Choice not found" });
         }
 
         const choiceBelongsToBeat = beat.choices.some((c) => c.toString() === choiceId);
         if (!choiceBelongsToBeat) {
             return res
                 .status(400)
-                .json({ message: "Choice does not belong to this beat" });
+                .json({ success: false, error: "Choice does not belong to this beat" });
         }
 
         // Check if user has already voted on this beat
@@ -49,7 +62,9 @@ export const submitVote = async (req: Request, res: Response) => {
         if (existingVote) {
             // If voting for the same choice, return success
             if (existingVote.choiceId.toString() === choiceId) {
-                return res.status(200).json({ message: "Vote already submitted" });
+                return res
+                    .status(200)
+                    .json({ success: true, data: { message: "Vote already submitted" } });
             }
 
             // If voting for a different choice, update the vote
@@ -79,7 +94,9 @@ export const submitVote = async (req: Request, res: Response) => {
 
             await session.commitTransaction();
 
-            return res.status(200).json({ message: "Vote updated successfully" });
+            return res
+                .status(200)
+                .json({ success: true, data: { message: "Vote updated successfully" } });
         } else {
             // Create a new vote
             const newVote = new Vote({
@@ -104,18 +121,24 @@ export const submitVote = async (req: Request, res: Response) => {
 
             await session.commitTransaction();
 
-            return res.status(201).json({ message: "Vote submitted successfully" });
+            return res.status(201).json({
+                success: true,
+                data: { message: "Vote submitted successfully" },
+            });
         }
     } catch (error) {
         await session.abortTransaction();
-        res.status(500).json({ message: "Error submitting vote", error });
+        res.status(500).json({ success: false, error: "Error submitting vote" });
     } finally {
         session.endSession();
     }
 };
 
 // Get votes for a beat
-export const getVotesForBeat = async (req: Request, res: Response) => {
+export const getVotesForBeat = async (
+    req: GetVotesForBeatRequest,
+    res: GetVotesForBeatResponse
+) => {
     try {
         const { beatId } = req.params;
 
@@ -125,17 +148,22 @@ export const getVotesForBeat = async (req: Request, res: Response) => {
         });
 
         if (!beat) {
-            return res.status(404).json({ message: "Story beat not found" });
+            return res
+                .status(404)
+                .json({ success: false, error: "Story beat not found" });
         }
 
-        res.status(200).json(beat.choices);
+        res.status(200).json({ success: true, data: beat.choices });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching votes", error });
+        res.status(500).json({ success: false, error: "Error fetching votes" });
     }
 };
 
 // Get user's vote for a beat
-export const getUserVoteForBeat = async (req: Request, res: Response) => {
+export const getUserVoteForBeat = async (
+    req: GetUserVoteForBeatRequest,
+    res: GetUserVoteForBeatResponse
+) => {
     try {
         const { userId, beatId } = req.params;
 
@@ -145,11 +173,11 @@ export const getUserVoteForBeat = async (req: Request, res: Response) => {
         );
 
         if (!vote) {
-            return res.status(404).json({ message: "Vote not found" });
+            return res.status(404).json({ success: false, error: "Vote not found" });
         }
 
-        res.status(200).json(vote);
+        res.status(200).json({ success: true, data: vote });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching user vote", error });
+        res.status(500).json({ success: false, error: "Error fetching user vote" });
     }
 };

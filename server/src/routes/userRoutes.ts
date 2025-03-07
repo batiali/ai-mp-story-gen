@@ -11,7 +11,7 @@ router.get("/me", requireAuth, userController.getCurrentUser);
 router.post("/sync", userController.syncUserProfile);
 
 // GET all users (protected)
-router.get("/", requireAuth, userController.getUsers);
+router.get("/", requireAuth, userController.getAllUsers);
 
 // GET user by ID (protected)
 router.get("/:id", requireAuth, userController.getUserById);

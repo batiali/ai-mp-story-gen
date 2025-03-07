@@ -1,4 +1,13 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { IChoice } from "./Choice";
+
+export interface IStoryBeat extends Document {
+    storyId: mongoose.Types.ObjectId;
+    content: string;
+    choices: IChoice[];
+    beatNumber: number;
+    createdAt: Date;
+}
 
 const StoryBeatSchema = new Schema(
     {
@@ -31,4 +40,5 @@ const StoryBeatSchema = new Schema(
     }
 );
 
-export default mongoose.model("StoryBeat", StoryBeatSchema);
+const StoryBeat = mongoose.model<IStoryBeat>("StoryBeat", StoryBeatSchema);
+export default StoryBeat;

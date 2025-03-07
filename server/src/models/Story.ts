@@ -1,4 +1,14 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { IUser } from "./User";
+
+export interface IStory extends Document {
+    title: string;
+    description: string;
+    createdBy: IUser;
+    currentBeat: number;
+    maxBeats: number;
+    isActive: boolean;
+}
 
 const StorySchema = new Schema(
     {
@@ -29,18 +39,11 @@ const StorySchema = new Schema(
             type: Boolean,
             default: true,
         },
-        createdAt: {
-            type: Date,
-            default: Date.now,
-        },
-        updatedAt: {
-            type: Date,
-            default: Date.now,
-        },
     },
     {
         timestamps: true,
     }
 );
 
-export default mongoose.model("Story", StorySchema);
+const Story = mongoose.model<IStory>("Story", StorySchema);
+export default Story;

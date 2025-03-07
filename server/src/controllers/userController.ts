@@ -1,38 +1,56 @@
-import { Request, Response } from "express";
 import { User } from "../models";
-import { CreateUserRequest, UpdateUserRequest, SyncUserProfileRequest } from "../types";
+import {
+    CreateUserRequest,
+    CreateUserResponse,
+    DeleteUserRequest,
+    DeleteUserResponse,
+    GetAllUsersRequest,
+    GetAllUsersResponse,
+    GetCurrentUserRequest,
+    GetCurrentUserResponse,
+    GetUserByIdRequest,
+    GetUserByIdResponse,
+    SyncUserProfileRequest,
+    SyncUserProfileResponse,
+    UpdateUserRequest,
+    UpdateUserResponse,
+} from "../types/user.types";
 
 // Get all users
-export const getUsers = async (req: Request, res: Response) => {
+export const getAllUsers = async (req: GetAllUsersRequest, res: GetAllUsersResponse) => {
     try {
         const users = await User.find();
-        res.status(200).json(users);
+        res.status(200).json({ success: true, data: users });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching users", error });
+        res.status(500).json({ success: false, error: "Error fetching users" });
     }
 };
 
 // Get user by ID
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: GetUserByIdRequest, res: GetUserByIdResponse) => {
     try {
-        const user = await User.findById(req.params.id);
+        const { id } = req.params;
+        const user = await User.findById(id);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ success: false, error: "User not found" });
         }
-        res.status(200).json(user);
+        res.status(200).json({ success: true, data: user });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching user", error });
+        res.status(500).json({ success: false, error: "Error fetching user" });
     }
 };
 
 // Get current user
-export const getCurrentUser = async (req: Request, res: Response) => {
+export const getCurrentUser = async (
+    req: GetCurrentUserRequest,
+    res: GetCurrentUserResponse
+) => {
     try {
         // Get user ID from auth token
         const userId = req.headers["user-id"];
 
         if (!userId) {
-            return res.status(401).json({ message: "Unauthorized" });
+            return res.status(401).json({ success: false, error: "Unauthorized" });
         }
 
         // Find user by email (from Supabase auth)
@@ -40,22 +58,25 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ success: false, error: "User not found" });
         }
 
-        res.status(200).json(user);
+        res.status(200).json({ success: true, data: user });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching current user", error });
+        res.status(500).json({ success: false, error: "Error fetching current user" });
     }
 };
 
 // Sync user profile (create or update)
-export const syncUserProfile = async (req: Request, res: Response) => {
+export const syncUserProfile = async (
+    req: SyncUserProfileRequest,
+    res: SyncUserProfileResponse
+) => {
     try {
-        const { email, username, avatarUrl }: SyncUserProfileRequest = req.body;
+        const { email, username, avatarUrl } = req.body;
 
         if (!email) {
-            return res.status(400).json({ message: "Email is required" });
+            return res.status(400).json({ success: false, error: "Email is required" });
         }
 
         // Find user by email
@@ -80,23 +101,22 @@ export const syncUserProfile = async (req: Request, res: Response) => {
             await user.save();
         }
 
-        res.status(200).json(user);
+        res.status(200).json({ success: true, data: user });
     } catch (error) {
-        res.status(500).json({ message: "Error syncing user profile", error });
+        res.status(500).json({ success: false, error: "Error syncing user profile" });
     }
 };
 
-// Create new user
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: CreateUserRequest, res: CreateUserResponse) => {
     try {
-        const { username, email, avatarUrl }: CreateUserRequest = req.body;
+        const { username, email, avatarUrl } = req.body;
 
         // Check if user with email already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res
                 .status(400)
-                .json({ message: "User with this email already exists" });
+                .json({ success: false, error: "User with this email already exists" });
         }
 
         const newUser = new User({
@@ -106,16 +126,16 @@ export const createUser = async (req: Request, res: Response) => {
         });
 
         const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
+        res.status(201).json({ success: true, data: savedUser });
     } catch (error) {
-        res.status(500).json({ message: "Error creating user", error });
+        res.status(500).json({ success: false, error: "Error creating user" });
     }
 };
 
 // Update user
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: UpdateUserRequest, res: UpdateUserResponse) => {
     try {
-        const { username, avatarUrl }: UpdateUserRequest = req.body;
+        const { username, avatarUrl } = req.body;
 
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
@@ -124,26 +144,26 @@ export const updateUser = async (req: Request, res: Response) => {
         );
 
         if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ success: false, error: "User not found" });
         }
 
-        res.status(200).json(updatedUser);
+        res.status(200).json({ success: true, data: updatedUser });
     } catch (error) {
-        res.status(500).json({ message: "Error updating user", error });
+        res.status(500).json({ success: false, error: "Error updating user" });
     }
 };
 
 // Delete user
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: DeleteUserRequest, res: DeleteUserResponse) => {
     try {
         const deletedUser = await User.findByIdAndDelete(req.params.id);
 
         if (!deletedUser) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ success: false, error: "User not found" });
         }
 
-        res.status(200).json({ message: "User deleted successfully" });
+        res.status(200).json({ success: true, data: deletedUser });
     } catch (error) {
-        res.status(500).json({ message: "Error deleting user", error });
+        res.status(500).json({ success: false, error: "Error deleting user" });
     }
 };

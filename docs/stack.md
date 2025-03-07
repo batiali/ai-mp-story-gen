@@ -20,7 +20,6 @@ Client Implementation
 -   Material UI (MUI) v5 - Modern React component library
 -   Emotion - Styled components and theming
 -   React Query - Server state management
--   Socket.io Client - Real-time communication
 
 📱 Key Pages & Components
 
@@ -42,7 +41,6 @@ Client Implementation
 🔧 Backend Stack
 
 -   Express.js - API framework
--   Socket.io - Real-time communication
 -   MongoDB - Story and game state persistence
 -   OpenAI SDK - Story generation
 -   Supabase - Authentication & user management
@@ -63,12 +61,9 @@ Client Implementation
 
 -   TypeScript - End-to-end type safety
 -   MERN Stack (MongoDB + Express.js + React + Node.js)
--   Socket.io - Real-time multiplayer functionality
 -   OpenAI - AI story generation
 -   Supabase - Authentication & user management
 -   Material UI - Component library & theming
-
-🔥 Multiplayer Features
 
 1️⃣ Real-Time Story Voting
 

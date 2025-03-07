@@ -1,5 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+export interface IChoice extends Document {
+    content: string;
+    votes: number;
+    voters: mongoose.Types.ObjectId[];
+}
+
 const ChoiceSchema = new Schema(
     {
         content: {
@@ -22,4 +28,5 @@ const ChoiceSchema = new Schema(
     }
 );
 
-export default mongoose.model("Choice", ChoiceSchema);
+const Choice = mongoose.model<IChoice>("Choice", ChoiceSchema);
+export default Choice;

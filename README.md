@@ -11,8 +11,8 @@ A collaborative platform where players shape AI-generated narratives through gro
 
 ## Tech Stack
 
--   **Frontend**: React, TypeScript, Material UI, Emotion, React Query, Socket.io Client
--   **Backend**: Node.js, Express, Socket.io, MongoDB, OpenAI SDK
+-   **Frontend**: React, TypeScript
+-   **Backend**: Node.js, Express, MongoDB, OpenAI SDK
 -   **Authentication**: Supabase
 -   **Deployment**: TBD
 

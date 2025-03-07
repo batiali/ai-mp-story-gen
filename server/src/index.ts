@@ -1,6 +1,5 @@
 import express from "express";
 import http from "http";
-import { Server } from "socket.io";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -11,12 +10,6 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:3000",
-        methods: ["GET", "POST"],
-    },
-});
 
 // Middleware
 app.use(cors());
@@ -31,9 +24,11 @@ app.use(routes);
 // Database connection
 const connectDB = async () => {
     try {
-        await mongoose.connect(
-            process.env.MONGODB_URI || "mongodb://localhost:27017/ai-narrative"
-        );
+        const mongoUri =
+            process.env.MONGODB_URI ||
+            "mongodb://mongodb-dev:27017/ai-narrative?replicaSet=rs0";
+        console.log("Connecting to MongoDB at:", mongoUri);
+        await mongoose.connect(mongoUri);
         console.log("MongoDB connected");
     } catch (error) {
         console.error("MongoDB connection error:", error);
@@ -44,15 +39,6 @@ const connectDB = async () => {
 // Routes
 app.get("/", (req, res) => {
     res.send("AI Narrative API is running");
-});
-
-// Socket.io connection
-io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id);
-
-    socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
-    });
 });
 
 // Start server
