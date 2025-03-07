@@ -1,0 +1,40 @@
+{
+    "name": "ai-narrative-platform",
+    "version": "1.0.0",
+    "description": "A collaborative platform where players shape AI-generated narratives through group decision-making. Each choice meaningfully impacts the story's progression, with the AI adapting dynamically to the group's decisions.",
+    "main": "index.js",
+    "directories": {
+        "doc": "docs"
+    },
+    "scripts": {
+        "client": "cd client && npm run dev",
+        "server": "cd server && npm run dev",
+        "dev": "concurrently \"npm run server\" \"npm run client\"",
+        "build": "cd client && npm run build && cd ../server && npm run build",
+        "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+        "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
+        "docker:dev:logs": "docker-compose -f docker-compose.dev.yml logs -f",
+        "docker:prod": "docker-compose up -d",
+        "docker:prod:down": "docker-compose down",
+        "docker:prod:logs": "docker-compose logs -f",
+        "docker:build": "docker-compose build",
+        "docker:dev:build": "docker-compose -f docker-compose.dev.yml build",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "ai",
+        "narrative",
+        "storytelling",
+        "collaborative",
+        "mern",
+        "typescript",
+        "socket.io",
+        "openai",
+        "supabase"
+    ],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}

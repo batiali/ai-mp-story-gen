@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+    # MongoDB service
+    mongodb:
+        image: mongo:latest
+        container_name: mongodb
+        restart: always
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongodb_data:/data/db
+        command: ["--replSet", "rs0", "--bind_ip_all"]
+        healthcheck:
+            test: mongosh --eval 'db.runCommand("ping").ok' --quiet
+            interval: 10s
+            timeout: 10s
+            retries: 5
+            start_period: 40s
+        networks:
+            - app-network
+
+    # MongoDB setup service
+    mongo-init:
+        image: mongo:latest
+        container_name: mongo-init
+        restart: "no"
+        depends_on:
+            mongodb:
+                condition: service_healthy
+        command: >
+            mongosh --host mongodb:27017 --eval '
+            if (!rs.isMaster().ismaster) {
+                rs.initiate({
+                    _id: "rs0",
+                    members: [{ _id: 0, host: "mongodb:27017" }]
+                });
+            };'
+        networks:
+            - app-network
+
+    # Server service
+    server:
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        container_name: server
+        restart: always
+        ports:
+            - "5001:5001"
+        depends_on:
+            mongo-init:
+                condition: service_completed_successfully
+        environment:
+            - PORT=5001
+            - NODE_ENV=development
+            - MONGODB_URI=mongodb://mongodb:27017/ai-narrative?replicaSet=rs0
+            - CLIENT_URL=http://localhost
+            - OPENAI_API_KEY=${OPENAI_API_KEY}
+            - SUPABASE_URL=${SUPABASE_URL}
+            - SUPABASE_KEY=${SUPABASE_KEY}
+        volumes:
+            - ./server:/app
+            - /app/node_modules
+        networks:
+            - app-network
+
+    # Client service
+    client:
+        build:
+            context: ./client
+            dockerfile: Dockerfile
+        container_name: client
+        restart: always
+        ports:
+            - "80:80"
+        depends_on:
+            - server
+        networks:
+            - app-network
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    mongodb_data:
